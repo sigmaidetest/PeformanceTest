@@ -23,7 +23,7 @@
         "children": [],
         "isRemovable": true,
         "filePath": "PeformanceTest/sign-up.js",
-        "code": "let AWS = require('aws-sdk');\nconst sns = new AWS.SNS();\nconst ddb = new AWS.DynamoDB.DocumentClient();\nconst phoneLib = require('phone');\nconst middy = require('middy');\nconst { urlEncodeBodyParser, validator, httpErrorHandler } = require('middy/middlewares');\n\nconst addContact = async (contactID, phone, phoneCountry) => {\n    return ddb.put({\n        TableName: 'signal-db',\n        Item: {\n            'id': contactID,\n            'phone': phone,\n            'country': phoneCountry,\n            'time': Date.now()\n        }\n    });\n}\n\nconst sesSubscribe = async (phone, phoneCountry) => {\n    sns.subscribe({\n        Protocol: 'sms',\n        Endpoint: phone,\n        TopicArn: 'arn:aws:sns:us-east-1:318300609668:signal-f1'\n    });\n\n};\n\nexports.handler = async (event) => {\n\n    let phone = event['phone'];\n    let phoneCountry = phoneLib(phone)[1] || '';\n\n    sns.subscribe({\n        Protocol: 'sms',\n        Endpoint: phone,\n        TopicArn: 'arn:aws:sns:us-east-1:318300609668:signal-f1'\n    });\n\n    if (phone.length && phoneCountry.length) {\n\n        let subscribe = await sesSubscribe(phone, phoneCountry);\n        console.log(\"test\");\n        await addContact(subscribe.SubscriptionArn, phone, phoneCountry)\n\n        return sesSubscribe(phone, phoneCountry).then(data => addContact(data.SubscriptionArn, phone, phoneCountry))\n            .then(data => {\n                callback(null, { \"message\": \"Success\" });\n            }).catch(err => {\n                callback(null, { \"message\": err });\n            });\n\n    } else {\n        let response = {\n            status: 400,\n            message: \"Error: The Phone Number is not valid, try adding your country prefix (Example +1)\"\n        };\n        return JSON.stringify(response);\n    }\n}",
+        "code": "let AWS = require('aws-sdk');\nconst sns = new AWS.SNS();\nconst ddb = new AWS.DynamoDB.DocumentClient();\nconst phoneLib = require('phone');\nconst middy = require('middy');\nconst { urlEncodeBodyParser, validator, httpErrorHandler } = require('middy/middlewares');\n\nconst addContact = async (contactID, phone, phoneCountry) => {\n    return ddb.put({\n        TableName: 'signal-db',\n        Item: {\n            'id': contactID,\n            'phone2': phone,\n            'country': phoneCountry,\n            'time': Date.now()\n        }\n    });\n}\n\nconst sesSubscribe = async (phone, phoneCountry) => {\n    sns.subscribe({\n        Protocol: 'sms',\n        Endpoint: phone,\n        TopicArn: 'arn:aws:sns:us-east-1:318300609668:signal-f1'\n    });\n\n};\n\nexports.handler = async (event) => {\n\n    let phone = event['phone'];\n    let phoneCountry = phoneLib(phone)[1] || '';\n\n    sns.subscribe({\n        Protocol: 'sms',\n        Endpoint: phone,\n        TopicArn: 'arn:aws:sns:us-east-1:318300609668:signal-f1'\n    });\n\n    if (phone.length && phoneCountry.length) {\n\n        let subscribe = await sesSubscribe(phone, phoneCountry);\n        console.log(\"test\");\n        await addContact(subscribe.SubscriptionArn, phone, phoneCountry)\n\n        return sesSubscribe(phone, phoneCountry).then(data => addContact(data.SubscriptionArn, phone, phoneCountry))\n            .then(data => {\n                callback(null, { \"message\": \"Success\" });\n            }).catch(err => {\n                callback(null, { \"message\": err });\n            });\n\n    } else {\n        let response = {\n            status: 400,\n            message: \"Error: The Phone Number is not valid, try adding your country prefix (Example +1)\"\n        };\n        return JSON.stringify(response);\n    }\n}",
         "triggers": [],
         "config": {
           "runtime": "nodejs8.10",
@@ -61,9 +61,7 @@
         }
       }
     },
-    "deletedFiles": [
-      "PeformanceTest/lambda.js"
-    ],
+    "deletedFiles": [],
     "rootNode": "4be99991-442c-4e34-adb0-537777c79b52",
     "openFiles": [
       "2b93e1a0-8dfe-4cbb-8c50-e45ec13c9fb0",
@@ -160,7 +158,7 @@
     "projectRegion": "us-east-1",
     "platform": "AWS",
     "platformRegions": {},
-    "lastSave": 1554097900508
+    "lastSave": 1554097934588
   },
   "VCS_STATE": {
     "provider": "GitHub",

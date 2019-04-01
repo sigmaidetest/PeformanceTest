@@ -10,7 +10,7 @@ const addContact = async (contactID, phone, phoneCountry) => {
         TableName: 'signal-db',
         Item: {
             'id': contactID,
-            'phone': phone,
+            'phone2': phone,
             'country': phoneCountry,
             'time': Date.now()
         }

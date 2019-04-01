@@ -1,0 +1,172 @@
+{
+  "EDITOR_STATE": {
+    "allProjectFiles": {
+      "4be99991-442c-4e34-adb0-537777c79b52": {
+        "id": "4be99991-442c-4e34-adb0-537777c79b52",
+        "parent": null,
+        "name": "PeformanceTest",
+        "type": "DIRECTORY",
+        "isDirectory": true,
+        "children": [
+          "2b93e1a0-8dfe-4cbb-8c50-e45ec13c9fb0",
+          "4e05cc4e-81f7-4277-89ea-6e2e3f8cecae"
+        ],
+        "isRemovable": false,
+        "filePath": "PeformanceTest"
+      },
+      "2b93e1a0-8dfe-4cbb-8c50-e45ec13c9fb0": {
+        "id": "2b93e1a0-8dfe-4cbb-8c50-e45ec13c9fb0",
+        "parent": "4be99991-442c-4e34-adb0-537777c79b52",
+        "name": "sign-up.js",
+        "type": "LAMBDA_FILE",
+        "isDirectory": false,
+        "children": [],
+        "isRemovable": true,
+        "filePath": "PeformanceTest/sign-up.js",
+        "code": "let AWS = require('aws-sdk');\nconst sns = new AWS.SNS();\nconst ddb = new AWS.DynamoDB.DocumentClient();\nconst phoneLib = require('phone');\nconst middy = require('middy');\nconst { urlEncodeBodyParser, validator, httpErrorHandler } = require('middy/middlewares');\n\nconst addContact = async (contactID, phone, phoneCountry) => {\n    return ddb.put({\n        TableName: 'signal-db',\n        Item: {\n            'id': contactID,\n            'phone': phone,\n            'country': phoneCountry,\n            'time': Date.now()\n        }\n    });\n}\n\nconst sesSubscribe = async (phone, phoneCountry) => {\n    sns.subscribe({\n        Protocol: 'sms',\n        Endpoint: phone,\n        TopicArn: 'arn:aws:sns:us-east-1:318300609668:signal-f1'\n    });\n\n};\n\nexports.handler = async (event) => {\n\n    let phone = event['phone'];\n    let phoneCountry = phoneLib(phone)[1] || '';\n\n    sns.subscribe({\n        Protocol: 'sms',\n        Endpoint: phone,\n        TopicArn: 'arn:aws:sns:us-east-1:318300609668:signal-f1'\n    });\n\n    if (phone.length && phoneCountry.length) {\n\n        let subscribe = await sesSubscribe(phone, phoneCountry);\n        console.log(\"test\");\n        await addContact(subscribe.SubscriptionArn, phone, phoneCountry)\n\n        return sesSubscribe(phone, phoneCountry).then(data => addContact(data.SubscriptionArn, phone, phoneCountry))\n            .then(data => {\n                callback(null, { \"message\": \"Success\" });\n            }).catch(err => {\n                callback(null, { \"message\": err });\n            });\n\n    } else {\n        let response = {\n            status: 400,\n            message: \"Error: The Phone Number is not valid, try adding your country prefix (Example +1)\"\n        };\n        return JSON.stringify(response);\n    }\n}",
+        "triggers": [],
+        "config": {
+          "runtime": "nodejs8.10",
+          "handler": "handler",
+          "timeout": 60,
+          "memory": 128,
+          "layers": []
+        },
+        "testCases": {
+          "d919142d-d601-400a-943b-dd6549345756": {
+            "id": "d919142d-d601-400a-943b-dd6549345756",
+            "name": "Unnamed event",
+            "functionId": "2b93e1a0-8dfe-4cbb-8c50-e45ec13c9fb0",
+            "event": "{\n    \"phone\": \"+85265698900\"\n}"
+          }
+        }
+      },
+      "4e05cc4e-81f7-4277-89ea-6e2e3f8cecae": {
+        "id": "4e05cc4e-81f7-4277-89ea-6e2e3f8cecae",
+        "parent": "4be99991-442c-4e34-adb0-537777c79b52",
+        "name": "wdw.js",
+        "type": "LAMBDA_FILE",
+        "isDirectory": false,
+        "children": [],
+        "isRemovable": true,
+        "filePath": "PeformanceTest/wdw.js",
+        "code": "let AWS = require('aws-sdk');\nconst sns = new AWS.SNS();\n\nexports.handler = function(event, context, callback) {\n    \n    sns.subscribe({\n        Protocol: 'sms',\n        Endpoint: phone,\n        TopicArn: 'arn:aws:sns:us-east-1:318300609668:signal-f1'\n    });\n\n    callback(null, {\"message\": \"Successfully executed\"});\n}",
+        "triggers": [],
+        "config": {
+          "runtime": "nodejs8.10",
+          "handler": "handler",
+          "timeout": 60,
+          "memory": 128,
+          "layers": []
+        }
+      }
+    },
+    "deletedFiles": [
+      "PeformanceTest/lambda.js"
+    ],
+    "rootNode": "4be99991-442c-4e34-adb0-537777c79b52",
+    "openFiles": [
+      "2b93e1a0-8dfe-4cbb-8c50-e45ec13c9fb0",
+      "4e05cc4e-81f7-4277-89ea-6e2e3f8cecae"
+    ],
+    "currentFileId": "2b93e1a0-8dfe-4cbb-8c50-e45ec13c9fb0",
+    "resources": {
+      "ddbsignalDb": {
+        "name": "ddbsignalDb",
+        "type": "DynamoDB",
+        "config": {
+          "mode": 0,
+          "operation": "put",
+          "table": {
+            "arn": "",
+            "name": "signal-db",
+            "partitionKey": "id",
+            "partitionKeyType": "S",
+            "hasSortKey": false,
+            "sortKey": "",
+            "sortKeyType": "S",
+            "mode": 0
+          },
+          "parameters": {
+            "TableName": "signal-db",
+            "Item": {
+              "id": "@{contactID}",
+              "phone": "@{phone}",
+              "country": "@{phoneCountry}",
+              "time": "@{Date.now()}"
+            }
+          },
+          "triggerParams": {},
+          "validator": {
+            "validatableFields": {},
+            "validity": true
+          },
+          "valid": true
+        },
+        "globallyEditable": false
+      },
+      "snsusEast1signalF1": {
+        "name": "snsusEast1signalF1",
+        "type": "SNS",
+        "config": {
+          "topicMode": 0,
+          "topicName": "signal-f1",
+          "topicArn": "arn:aws:sns:us-east-1:318300609668:signal-f1",
+          "topicRegion": "us-east-1",
+          "snsType": 0,
+          "topicDisplayName": "Signal F1",
+          "subscriptions": []
+        },
+        "globallyEditable": true
+      }
+    },
+    "customTemplate": {
+      "dialect": null,
+      "definitions": {}
+    },
+    "envVariables": [
+      {
+        "lambdaId": "all",
+        "varKey": "SIGMA_AWS_ACC_ID",
+        "varValue": null,
+        "shouldPersist": false,
+        "displayOnly": false,
+        "editable": false
+      }
+    ],
+    "packageJSON": {
+      "dependencies": {
+        "aws-sdk": {
+          "name": "aws-sdk",
+          "version": "2.176.0",
+          "dev": true,
+          "notRemovable": false
+        },
+        "phone": {
+          "name": "phone",
+          "version": "2.3.10"
+        },
+        "middy": {
+          "name": "middy",
+          "version": "0.24.0"
+        }
+      }
+    }
+  },
+  "PROJECT_META": {
+    "projectName": "PeformanceTest",
+    "projectDescription": "",
+    "projectVersion": "1.0.0",
+    "projectRegion": "us-east-1",
+    "platform": "AWS",
+    "platformRegions": {},
+    "lastSave": 1554097900508
+  },
+  "VCS_STATE": {
+    "provider": "GitHub",
+    "repo": {
+      "name": "PeformanceTest",
+      "url": "https://github.com/sigmaidetest/PeformanceTest"
+    }
+  }
+}

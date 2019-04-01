@@ -1,0 +1,11 @@
+{
+  "name": "PeformanceTest",
+  "version": "1.0.0",
+  "dependencies": {
+    "phone": "2.3.10",
+    "middy": "0.24.0"
+  },
+  "devDependencies": {
+    "aws-sdk": "2.176.0"
+  }
+}
